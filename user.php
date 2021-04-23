@@ -1,9 +1,6 @@
 <?php
 
-$connect = mysqli_connect("localhost", "root", "", "assignment3");
-if (!$connect) {
-    die("Database Connection Failed" . mysqli_error($connect));
-}
+include 'database.php';
 
 ?>
 <!DOCTYPE html>
@@ -23,8 +20,8 @@ if (!$connect) {
 <body>
 
     <?php
-    $message = "";
     if (isset($_POST['submit'])) {
+
         $client_name     = $_POST['client_name'];
         $client_address  = $_POST['client_address'];
         $client_phone    = $_POST['client_phone'];
@@ -33,6 +30,7 @@ if (!$connect) {
         $client_appDate  = $_POST['client_appDate'];
         $client_choice   = $_POST['client_choice'];
 
+        //Date Selection Query
         $date_query = "SELECT client_appDate FROM userpanel WHERE client_name = '$client_name'";
 
         $response = mysqli_query($connect, $date_query);
@@ -41,9 +39,12 @@ if (!$connect) {
 
         $date_check = $row['client_appDate'];
 
+        //Date Checking
         if ($date_check == $client_appDate) {
             echo "Booked appointment on same date, choose other day.";
         } else {
+
+            //mechanic car servicing status checking query
             $mechanic_query = "SELECT servicing_cars FROM mechanic WHERE mechanic_id = '$client_choice'";
 
             $status = mysqli_query($connect, $mechanic_query);
@@ -52,7 +53,10 @@ if (!$connect) {
 
             $free_check = $row['servicing_cars'];
 
+            //servicing check query
             if ($free_check <= "4") {
+
+                //inserting data to table
                 $query = "INSERT INTO userpanel (client_id, client_name, client_address, client_phone, client_license, client_engine, client_appDate, client_choice) VALUES ('', '$client_name', '$client_address', '$client_phone', '$client_license', '$client_engine', '$client_appDate', '$client_choice')";
 
                 $msg = mysqli_query($connect, $query);
@@ -64,6 +68,7 @@ if (!$connect) {
 
                 $free_check++;
 
+                //updating mechanic table
                 $update_query = "UPDATE `mechanic` SET `servicing_cars`='$free_check' WHERE `mechanic_id` = '$client_choice'";
                 $up_check = mysqli_query($connect, $update_query);
             } else {
